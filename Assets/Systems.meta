@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<< HEAD:Assets/Systems.meta
 guid: b800d7525da17994d818044fb8fceea2
+=======
+guid: 46f2440a266e543baa4f01f918ce5ba6
+>>>>>>> Add new components:Assets/Components.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
