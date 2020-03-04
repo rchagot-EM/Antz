@@ -27,13 +27,13 @@ public class ObstacleSpawning : JobComponentSystem
         var settings = GetSingleton<AntManagerSettings>();
         var mapSize = settings.MapSize;
 
-        Entities.WithStructuralChanges().ForEach((in ObstacleSpawner spawner) =>
+        Entities.WithStructuralChanges().ForEach((ref ObstacleSpawner spawner) =>
         {
             //TODO clean up
             //float rRadius = (spawner.ObstacleRingCount / (spawner.ObstacleRingCount + 1f)) * (mapSize * .5f);
             //float cir = rRadius * 2f * Mathf.PI;
             //int ultraMaxCount = Mathf.CeilToInt(cir / (2f * spawner.ObstacleRadius) * 2f) * spawner.ObstacleRingCount; 
-            List<Matrix4x4> obstaclesToSpawn = new List<Matrix4x4>(1000);// ultraMaxCount);
+            NativeList<Matrix4x4> obstaclesToSpawn = new NativeList<Matrix4x4>();// ultraMaxCount);
 
             for (int ring = 1; ring <= spawner.ObstacleRingCount; ring++)
             {
@@ -55,7 +55,7 @@ public class ObstacleSpawning : JobComponentSystem
                     }
                 }
             }
-            using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, obstaclesToSpawn.Count, Allocator.Temp))
+            using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, obstaclesToSpawn.Length, Allocator.Temp))
             {
                 for (int j = 0; j < obstacles.Length; j++)
                 {
