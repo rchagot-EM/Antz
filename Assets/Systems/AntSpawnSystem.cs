@@ -50,8 +50,10 @@ public class AntSpawnSystem : JobComponentSystem
             }
 
             //EntityManager.DestroyEntity(e);
-            EntityManager.SetEnabled(e, false);
+            //EntityManager.SetEnabled(e, false);
         }).Run();
+
+        Enabled = false;
 
         return inputDeps;
     }
