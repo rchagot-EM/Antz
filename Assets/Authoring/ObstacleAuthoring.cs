@@ -9,11 +9,14 @@ public class ObstacleAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
+        // TODO: Get real value from mesh...
+        float sphereRadius = 0.5f;
+
         dstManager.AddComponent<TagObstacle>(entity);
         dstManager.AddComponent<Position>(entity);
         dstManager.AddComponentData(entity, new Radius
         {
-            Value = transform.localScale.magnitude
+            Value = transform.localScale.magnitude * sphereRadius
         });
 
         dstManager.RemoveComponent<Translation>(entity);
