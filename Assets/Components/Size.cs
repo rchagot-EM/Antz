@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 
 public struct Size : IComponentData
 {
-    public float Value;
+    public float2 Value;
 }
