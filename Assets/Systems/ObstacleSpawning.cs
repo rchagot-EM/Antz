@@ -28,7 +28,7 @@
 
 		        var settings = GetSingleton<AntManagerSettings>();
 		        var mapSize = settings.MapSize;
-		        Entities.ForEach((Entity e, ref ObstacleSpawner spawner) =>
+		        Entities.WithStructuralChanges().ForEach((Entity e, ref ObstacleSpawner spawner) =>
 		        {
 			        for (int ring = 0; ring < spawner.ObstacleRingCount; ++ring)
 			        {
