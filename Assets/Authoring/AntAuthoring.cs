@@ -10,15 +10,6 @@ public class AntAuthoring : MonoBehaviour, IConvertGameObjectToEntity
 
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
-        //TODO get real size from mesh
-        float2 meshSize = new float2(1f, 1f);
-        var scale = transform.localScale;
-        var size = new Size
-        {
-            Value = new float2(meshSize.x * scale.x, scale.y / meshSize.y)
-        };
-        dstManager.AddComponentData(entity, size);
-
         dstManager.AddComponentData(entity, new Speed
         {
             Value = 0f

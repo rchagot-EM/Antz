@@ -28,7 +28,6 @@ public struct AntSpawner : IComponentData
 {
 	public Entity AntPrefab;
 	public int AntCount;
-	public Vector3 AntSize; // move to Ant conversion?
 }
 
 
@@ -51,7 +50,6 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 	public int antCount;
 	public int mapSize = 128;
 	public int bucketResolution;
-	public Vector3 antSize;
 	public float antSpeed;
 	[Range(0f, 1f)]
 	public float antAccel;
@@ -92,8 +90,7 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 		dstManager.AddComponentData(entity, new AntSpawner
 		{
 			AntPrefab = conversionSystem.GetPrimaryEntity(antPrefab),
-			AntCount = antCount,
-			AntSize = antSize
+			AntCount = antCount
 		});
 
 		dstManager.AddComponentData(entity, new ObstacleSpawner
