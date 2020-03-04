@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -9,8 +10,9 @@ public class PheromoneRendererAuthoring : MonoBehaviour, IConvertGameObjectToEnt
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         dstManager.AddComponent<TagPheromoneRenderer>(entity);
-        dstManager.AddComponent<Position>(entity);
-        dstManager.RemoveComponent<Translation>(entity);
-        dstManager.RemoveComponent<Rotation>(entity);
+        dstManager.SetComponentData(entity, new Translation
+        {
+            Value = new float3(0.5f, 0.5f, 0.0f)
+        });
     }
 }
