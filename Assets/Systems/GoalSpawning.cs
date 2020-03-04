@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
+using Unity.Transforms;
 using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -21,6 +22,9 @@ public class GoalSpawning : JobComponentSystem
 
                 var colony = EntityManager.Instantiate(spawner.ColonyPrefab);
                 EntityManager.SetComponentData(colony, new Position { Value = colonyPosition });
+
+                var scale = EntityManager.GetComponentData<NonUniformScale>(colony);
+                EntityManager.SetComponentData(colony, new NonUniformScale { Value = scale.Value / mapSize });
             })
             .Run();
         }
@@ -36,6 +40,9 @@ public class GoalSpawning : JobComponentSystem
 
                 var foodsource = EntityManager.Instantiate(spawner.FoodSourcePrefab);
                 EntityManager.SetComponentData(foodsource, new Position { Value = resourcePosition });
+
+                var scale = EntityManager.GetComponentData<NonUniformScale>(foodsource);
+                EntityManager.SetComponentData(foodsource, new NonUniformScale { Value = scale.Value / mapSize });
             })
             .Run();
         }
