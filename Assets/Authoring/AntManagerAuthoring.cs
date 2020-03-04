@@ -35,7 +35,7 @@ public struct ObstacleSpawner : IComponentData
 {
 	public Entity ObstaclePrefab;
 	public int ObstacleRingCount;
-	public float ObstaclesPerRing;
+	public int ObstaclesPerRing;
 	public float ObstacleRadius;
 }
 
@@ -65,7 +65,7 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 	public int rotationResolution = 360;
 	public int obstacleRingCount;
 	[Range(0f, 1f)]
-	public float obstaclesPerRing;
+	public int obstaclesPerRing;
 	public float obstacleRadius;
 
 
