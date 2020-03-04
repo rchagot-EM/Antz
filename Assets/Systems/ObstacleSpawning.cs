@@ -6,12 +6,9 @@
         using Unity.Transforms;
         using UnityEngine;
 
+        [UpdateInGroup(typeof(InitializationSystemGroup))]
         public class ObstacleSpawning : JobComponentSystem
         {
-            public ObstacleSpawning()
-            {
-            }
-
             protected override void OnCreate()
             {
                 base.OnCreate();
@@ -32,13 +29,14 @@
 		        {
 			        for (int ring = 0; ring < spawner.ObstacleRingCount; ++ring)
 			        {
-				        using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, spawner.ObstaclesPerRing, Allocator.Temp))
+						float ringRadius = (ring / (spawner.ObstacleRingCount + 1f)) * (mapSize * .5f);
+						float circumference = ringRadius * 2f * Mathf.PI;
+						int maxCount = Mathf.CeilToInt(circumference / (2f * spawner.ObstacleRadius) * 2f);
+
+						using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, maxCount, Allocator.Temp))
 				        {
 						    for (int i = 0; i < obstacles.Length; ++i)
 						    {
-							    float ringRadius = (ring / (spawner.ObstacleRingCount + 1f)) * mapSize;
-							    float circumference = ringRadius * 2f * Mathf.PI;
-							    int maxCount = Mathf.CeilToInt(circumference / (2f * spawner.ObstacleRadius));
 							    int offset = UnityEngine.Random.Range(0, maxCount);
 							    int holeCount = UnityEngine.Random.Range(1, 3);
 
