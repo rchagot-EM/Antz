@@ -18,8 +18,7 @@ public class PheromoneRendererSpawnSystem : JobComponentSystem
                 int mapSize = settings.MapSize;
                 Vector2 rendererPosition = Vector2.one * mapSize * .5f;
 
-                var renderer = EntityManager.Instantiate(settings.PheromoneRendererPrefab);
-                EntityManager.SetComponentData(renderer, new Position { Value = rendererPosition });
+                EntityManager.Instantiate(settings.PheromoneRendererPrefab);
             })
             .Run();
         }
