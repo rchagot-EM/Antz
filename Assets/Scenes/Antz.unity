@@ -494,6 +494,85 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &1202447643
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1202447646}
+  - component: {fileID: 1202447645}
+  - component: {fileID: 1202447644}
+  m_Layer: 0
+  m_Name: Ant Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1202447644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202447643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 0
+--- !u!114 &1202447645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202447643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c72b50044224d33a008eabdd9a7a07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  antPrefab: {fileID: 2365619915284946574, guid: 9e0984c44415d461fae227350e9843c6,
+    type: 3}
+  obstaclePrefab: {fileID: 1325719820563068665, guid: a0c418821682c424fad23980f9c946c9,
+    type: 3}
+  antCount: 1000
+  mapSize: 128
+  bucketResolution: 64
+  antSize: {x: 0.008, y: 0.004, z: 0.004}
+  antSpeed: 0.2
+  antAccel: 0.07
+  trailAddSpeed: 0.3
+  trailDecay: 0.9985
+  randomSteering: 0.14
+  pheromoneSteerStrength: 0.015
+  wallSteerStrength: 0.12
+  goalSteerStrength: 0.04
+  outwardStrength: 0.003
+  inwardStrength: 0.003
+  rotationResolution: 360
+  obstacleRingCount: 3
+  obstaclesPerRing: 0.8
+  obstacleRadius: 2
+--- !u!4 &1202447646
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1202447643}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1344739842
 GameObject:
   m_ObjectHideFlags: 0
