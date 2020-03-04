@@ -21,6 +21,10 @@ public struct AntManagerSettings : IComponentData
 	public float OutwardStrength;
 	public float InwardStrength;
 	public int RotationResolution;
+
+	public Entity ColonyPrefab;
+	public Entity FoodSourcePrefab;
+	public Entity PheromoneRendererPrefab;
 }
 
 
@@ -39,12 +43,6 @@ public struct ObstacleSpawner : IComponentData
 	public float ObstacleRadius;
 }
 
-public struct GoalSpawner : IComponentData
-{
-	public Entity ColonyPrefab;
-	public Entity FoodSourcePrefab;
-}
-
 [DisallowMultipleComponent]
 [RequiresEntityConversion]
 public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
@@ -53,6 +51,7 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 	public GameObject obstaclePrefab;
 	public GameObject colonyPrefab;
 	public GameObject foodSourcePrefab;
+	public GameObject pheromoneRendererPrefab;
 
 	public int antCount;
 	public int mapSize = 128;
@@ -91,7 +90,11 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 			GoalSteerStrength = goalSteerStrength,
 			OutwardStrength = outwardStrength,
 			InwardStrength = inwardStrength,
-			RotationResolution = rotationResolution
+			RotationResolution = rotationResolution,
+
+			ColonyPrefab = conversionSystem.GetPrimaryEntity(colonyPrefab),
+			FoodSourcePrefab = conversionSystem.GetPrimaryEntity(foodSourcePrefab),
+            PheromoneRendererPrefab = conversionSystem.GetPrimaryEntity(pheromoneRendererPrefab)
 		});
 
 		dstManager.AddComponentData(entity, new AntSpawner
@@ -107,12 +110,6 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 			ObstaclesPerRing = obstaclesPerRing,
 			ObstacleRadius = obstacleRadius
 		});
-
-		dstManager.AddComponentData(entity, new GoalSpawner
-		{
-			ColonyPrefab = conversionSystem.GetPrimaryEntity(colonyPrefab),
-			FoodSourcePrefab = conversionSystem.GetPrimaryEntity(foodSourcePrefab)
-		});
 	}
 
 
@@ -122,5 +119,6 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 		referencedPrefabs.Add(obstaclePrefab);
 		referencedPrefabs.Add(colonyPrefab);
 		referencedPrefabs.Add(foodSourcePrefab);
+		referencedPrefabs.Add(pheromoneRendererPrefab);
 	}
 }

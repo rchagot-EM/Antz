@@ -590,6 +590,8 @@ MonoBehaviour:
     type: 3}
   foodSourcePrefab: {fileID: 9030651862682354861, guid: 57fc5236e9dfb4781beb28833ab8f385,
     type: 3}
+  pheromoneRendererPrefab: {fileID: 7695722730819358069, guid: 52ee2e989c1984724832918fd1417bda,
+    type: 3}
   antCount: 1000
   mapSize: 128
   bucketResolution: 64

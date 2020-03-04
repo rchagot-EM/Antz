@@ -4,8 +4,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
-//[UpdateAfter(typeof(InitSystem))]
-public class GoalSpawning : JobComponentSystem
+public class GoalSpawnSystem : JobComponentSystem
 {
     private EntityQuery m_ColonyQuery;
     private EntityQuery m_FoodSourceQuery;
@@ -15,12 +14,12 @@ public class GoalSpawning : JobComponentSystem
         bool hasNoColonies = m_ColonyQuery.IsEmptyIgnoreFilter;
         if (hasNoColonies)
         {
-            Entities.WithStructuralChanges().ForEach((ref AntManagerSettings settings, ref GoalSpawner spawner) =>
+            Entities.WithStructuralChanges().ForEach((ref AntManagerSettings settings) =>
             {
                 int mapSize = settings.MapSize;
                 Vector2 colonyPosition = Vector2.one * mapSize * .5f;
 
-                var colony = EntityManager.Instantiate(spawner.ColonyPrefab);
+                var colony = EntityManager.Instantiate(settings.ColonyPrefab);
                 EntityManager.SetComponentData(colony, new Position { Value = colonyPosition });
 
                 var scale = EntityManager.GetComponentData<NonUniformScale>(colony);
@@ -32,13 +31,13 @@ public class GoalSpawning : JobComponentSystem
         bool hasNoFoodSources = m_FoodSourceQuery.IsEmptyIgnoreFilter;
         if (hasNoFoodSources)
         {
-            Entities.WithStructuralChanges().ForEach((ref AntManagerSettings settings, ref GoalSpawner spawner) =>
+            Entities.WithStructuralChanges().ForEach((ref AntManagerSettings settings) =>
             {
                 int mapSize = settings.MapSize;
                 float resourceAngle = Random.value * 2f * Mathf.PI;
                 Vector2 resourcePosition = Vector2.one * mapSize * .5f + new Vector2(Mathf.Cos(resourceAngle) * mapSize * .475f, Mathf.Sin(resourceAngle) * mapSize * .475f);
 
-                var foodsource = EntityManager.Instantiate(spawner.FoodSourcePrefab);
+                var foodsource = EntityManager.Instantiate(settings.FoodSourcePrefab);
                 EntityManager.SetComponentData(foodsource, new Position { Value = resourcePosition });
 
                 var scale = EntityManager.GetComponentData<NonUniformScale>(foodsource);
