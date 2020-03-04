@@ -4,17 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
+using Unity.Entities;
 
 public class KeyboardInput : MonoBehaviour
 {
     Text text;
-
     static bool showText = true;
+    EntityQuery universalQuery;
+    String antz;
 
     void Start()
     {
         text = GetComponent<Text>();
         text.enabled = showText;
+        universalQuery = World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery;
+        antz = SceneManager.GetActiveScene().ToString();
     }
 
     void Update()
@@ -29,7 +33,8 @@ public class KeyboardInput : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(universalQuery);
+            SceneManager.LoadScene("Antz");
         }
 
     }
