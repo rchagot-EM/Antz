@@ -39,6 +39,11 @@ public struct ObstacleSpawner : IComponentData
 	public float ObstacleRadius;
 }
 
+public struct GoalSpawner : IComponentData
+{
+	public Entity ColonyPrefab;
+	public Entity FoodSourcePrefab;
+}
 
 [DisallowMultipleComponent]
 [RequiresEntityConversion]
@@ -46,6 +51,8 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 {
 	public GameObject antPrefab;
 	public GameObject obstaclePrefab;
+	public GameObject colonyPrefab;
+	public GameObject foodSourcePrefab;
 
 	public int antCount;
 	public int mapSize = 128;
@@ -100,6 +107,12 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 			ObstaclesPerRing = obstaclesPerRing,
 			ObstacleRadius = obstacleRadius
 		});
+
+		dstManager.AddComponentData(entity, new GoalSpawner
+		{
+			ColonyPrefab = conversionSystem.GetPrimaryEntity(colonyPrefab),
+			FoodSourcePrefab = conversionSystem.GetPrimaryEntity(foodSourcePrefab)
+		});
 	}
 
 
@@ -107,5 +120,7 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 	{
 		referencedPrefabs.Add(antPrefab);
 		referencedPrefabs.Add(obstaclePrefab);
+		referencedPrefabs.Add(colonyPrefab);
+		referencedPrefabs.Add(foodSourcePrefab);
 	}
 }

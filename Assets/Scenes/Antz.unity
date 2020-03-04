@@ -452,6 +452,10 @@ MonoBehaviour:
     type: 3}
   obstaclePrefab: {fileID: 1325719820563068665, guid: a0c418821682c424fad23980f9c946c9,
     type: 3}
+  colonyPrefab: {fileID: 7991785418212480948, guid: 8c700bdfc5cda496283b99d7d8c9663f,
+    type: 3}
+  foodSourcePrefab: {fileID: 9030651862682354861, guid: 57fc5236e9dfb4781beb28833ab8f385,
+    type: 3}
   antCount: 1000
   mapSize: 128
   bucketResolution: 64
@@ -481,7 +485,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+<<<<<<< HEAD
   m_RootOrder: 2
+=======
+  m_RootOrder: 3
+>>>>>>> GoalSpawning
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1344739842
 GameObject:
