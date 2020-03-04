@@ -33,5 +33,21 @@ public class AntAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         dstManager.RemoveComponent<Translation>(entity);
         dstManager.RemoveComponent<Rotation>(entity);
         dstManager.AddComponent(entity, typeof(TagAnt));
+        dstManager.AddComponentData(entity, new PheromoneSteering
+        {
+            Value = 0f
+        });
+        dstManager.AddComponentData(entity, new GoalSteering
+        {
+            Value = 0f
+        });
+        dstManager.AddComponentData(entity, new WallSteering
+        {
+            Value = 0f
+        });
+        dstManager.AddComponentData(entity, new RandomSteering
+        {
+            Value = 0f
+        });
     }
 }
