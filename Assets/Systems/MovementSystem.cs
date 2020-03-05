@@ -14,6 +14,7 @@ public class MovementSystem : JobComponentSystem
     [BurstCompile]
     struct MovementSystemJob : IJobForEach<Position, FacingAngle, Speed>
     {
+        public float DeltaTime;
         public int MapSize;
         public float OutwardStrength;
         public float ObstacleRadius;
@@ -22,8 +23,8 @@ public class MovementSystem : JobComponentSystem
     
         public void Execute(ref Position position, /*[ReadOnly] */ref FacingAngle facingAngle, [ReadOnly] ref Speed speed)
         {
-            float vx = math.cos(facingAngle.Value) * speed.Value;
-            float vy = math.sin(facingAngle.Value) * speed.Value;
+            float vx = math.cos(facingAngle.Value) * speed.Value * DeltaTime;
+            float vy = math.sin(facingAngle.Value) * speed.Value * DeltaTime;
             float ovx = vx;
             float ovy = vy;
 
@@ -95,6 +96,7 @@ public class MovementSystem : JobComponentSystem
         //@TODO: split?
         var job = new MovementSystemJob
         {
+            DeltaTime = World.Time.DeltaTime,
             MapSize = settings.MapSize,
             OutwardStrength = settings.OutwardStrength,
             ObstacleRadius = obstacleSpawner.ObstacleRadius,

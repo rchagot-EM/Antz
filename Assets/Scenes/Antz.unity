@@ -595,7 +595,7 @@ MonoBehaviour:
   antCount: 5000
   mapSize: 128
   bucketResolution: 64
-  antSpeed: 0.2
+  antSpeed: 5
   antAccel: 0.2
   trailAddSpeed: 0.3
   trailDecay: 0.9985
