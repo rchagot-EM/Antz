@@ -12,16 +12,20 @@ using static Unity.Mathematics.math;
 public class MovementSystem : JobComponentSystem
 {
     [BurstCompile]
-    struct MovementSystemJob : IJobForEach<Position, FacingAngle, Speed>
+    struct MovementSystemJob : IJobForEachWithEntity<Position, FacingAngle, Speed>
     {
         public float DeltaTime;
         public int MapSize;
         public float OutwardStrength;
+        public float InwardStrength;
+        public float2 ColonyPosition;
         public float ObstacleRadius;
         public int BucketResolution;
         public ObstacleBuckets OstacleBuckets; // copy :/
+        [ReadOnly] public ComponentDataFromEntity<TagAntHasFood> HasFoodComponent; 
     
-        public void Execute(ref Position position, /*[ReadOnly] */ref FacingAngle facingAngle, [ReadOnly] ref Speed speed)
+        public void Execute(Entity entity, int index,
+            ref Position position, /*[ReadOnly] */ref FacingAngle facingAngle, [ReadOnly] ref Speed speed)
         {
             float vx = math.cos(facingAngle.Value) * speed.Value * DeltaTime;
             float vy = math.sin(facingAngle.Value) * speed.Value * DeltaTime;
@@ -43,9 +47,8 @@ public class MovementSystem : JobComponentSystem
             }
 
 
-            //@TODO: Obstacles
+            // Obstacles
             var nearbyObstacles = OstacleBuckets.GetObstacleBucket(position.Value.x, position.Value.y, MapSize, BucketResolution);
-            //for (int j = 0; j < nearbyObstacles.Length; j++)
             while (nearbyObstacles.MoveNext())
             {
                 Position obstaclePosition = nearbyObstacles.Current;
@@ -67,6 +70,19 @@ public class MovementSystem : JobComponentSystem
 
 
             //@TODO: inward/outward direction
+            float inwardOrOutward = -OutwardStrength;
+            float pushRadius = MapSize * .4f;
+            if (HasFoodComponent.HasComponent(entity))
+            {
+                inwardOrOutward = InwardStrength;
+                pushRadius = MapSize;
+            }
+            float dx2 = ColonyPosition.x - position.Value.x;
+            float dy2 = ColonyPosition.y - position.Value.y;
+            float dist2 = math.sqrt(dx2 * dx2 + dy2 * dy2);
+            inwardOrOutward *= 1f - math.saturate(dist2 / pushRadius);
+            vx += dx2 / dist2 * inwardOrOutward;
+            vy += dy2 / dist2 * inwardOrOutward;
 
 
             // Update facing angle based on new position
@@ -93,17 +109,27 @@ public class MovementSystem : JobComponentSystem
         var obstacleSpawner = GetSingleton<ObstacleSpawner>();
         var obstacleBuckets = GetSingleton<ObstacleBuckets>();
 
+        var colonyQuery = GetEntityQuery(
+            ComponentType.ReadOnly<TagColony>(),
+            ComponentType.ReadOnly<Position>());
+        var colonyPositions = colonyQuery.ToComponentDataArray<Position>(Allocator.TempJob);
+
         //@TODO: split?
         var job = new MovementSystemJob
         {
             DeltaTime = World.Time.DeltaTime,
             MapSize = settings.MapSize,
             OutwardStrength = settings.OutwardStrength,
+            InwardStrength = settings.InwardStrength,
+            ColonyPosition = colonyPositions[0].Value,
             ObstacleRadius = obstacleSpawner.ObstacleRadius,
             BucketResolution = settings.BucketResolution,
-            OstacleBuckets = obstacleBuckets
+            OstacleBuckets = obstacleBuckets,
+            HasFoodComponent = GetComponentDataFromEntity<TagAntHasFood>(true)
         };
-        
+
+        colonyPositions.Dispose();
+
         return job.Schedule(this, inputDependencies);
     }
 }
