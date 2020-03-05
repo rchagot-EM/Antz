@@ -8,7 +8,7 @@ using static Unity.Mathematics.math;
 
 
 [UpdateAfter(typeof(SpeedUpdateSystem))]
-//[UpdateAfter(typeof(FacingAngleSystem))] //@TODO
+[UpdateAfter(typeof(OrientationSystem))]
 public class MovementSystem : JobComponentSystem
 {
     [BurstCompile]
