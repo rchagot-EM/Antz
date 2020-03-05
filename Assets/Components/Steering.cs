@@ -11,7 +11,7 @@ public struct GoalSteering : IComponentData
     public float Value;
 }
 
-public struct WallSteering : IComponentData
+public struct ObstacleSteering : IComponentData
 {
     public float Value;
 }

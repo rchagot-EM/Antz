@@ -19,7 +19,7 @@ public class AntAuthoring : MonoBehaviour, IConvertGameObjectToEntity
         dstManager.AddComponent<FacingAngle>(entity);
         dstManager.AddComponent<PheromoneSteering>(entity);
         dstManager.AddComponent<GoalSteering>(entity);
-        dstManager.AddComponent<WallSteering>(entity);
+        dstManager.AddComponent<ObstacleSteering>(entity);
         dstManager.AddComponent<RandomSteering>(entity);
     }
 }

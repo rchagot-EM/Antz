@@ -10,7 +10,7 @@ using Unity.Transforms;
 public class OrientationSystem : JobComponentSystem
 {
     [BurstCompile]
-    struct OrientationSystemJob : IJobForEach<FacingAngle, RandomSteering, PheromoneSteering, WallSteering, GoalSteering>
+    struct OrientationSystemJob : IJobForEach<FacingAngle, RandomSteering, PheromoneSteering, ObstacleSteering, GoalSteering>
     {
         public float PheromoneSteerStrength;
         public float WallSteerStrength;
@@ -19,7 +19,7 @@ public class OrientationSystem : JobComponentSystem
             ref FacingAngle facingAngle,
             [ReadOnly] ref RandomSteering randomSteering,
             [ReadOnly] ref PheromoneSteering pheroSteering,
-            [ReadOnly] ref WallSteering wallSteering,
+            [ReadOnly] ref ObstacleSteering wallSteering,
             [ReadOnly] ref GoalSteering goalSteering)
         {
             facingAngle.Value += randomSteering.Value;
