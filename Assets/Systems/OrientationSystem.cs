@@ -14,6 +14,7 @@ public class OrientationSystem : JobComponentSystem
     {
         public float PheromoneSteerStrength;
         public float WallSteerStrength;
+        public float GoalSteerStrength;
 
         public void Execute(
             ref FacingAngle facingAngle,
@@ -25,8 +26,7 @@ public class OrientationSystem : JobComponentSystem
             facingAngle.Value += randomSteering.Value;
             facingAngle.Value += pheroSteering.Value * PheromoneSteerStrength;
             facingAngle.Value += wallSteering.Value * WallSteerStrength;
-
-            //@TODO: Goal
+            facingAngle.Value += goalSteering.Value * GoalSteerStrength;
         }
     }
 
@@ -46,7 +46,8 @@ public class OrientationSystem : JobComponentSystem
         var job = new OrientationSystemJob
         {
             PheromoneSteerStrength = settings.PheromoneSteerStrength,
-            WallSteerStrength = settings.WallSteerStrength
+            WallSteerStrength = settings.WallSteerStrength,
+            GoalSteerStrength = settings.GoalSteerStrength
         };
 
         return job.Schedule(this, inputDependencies);
