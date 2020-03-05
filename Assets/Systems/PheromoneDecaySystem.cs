@@ -11,13 +11,20 @@ public class PheromoneDecaySystem : JobComponentSystem
 
         int mapSize = settings.MapSize;
         float trailDecay = settings.TrailDecay;
-
-        for (int i = 0; i < mapSize * mapSize; ++i)
+        
+        var prevSystem = World.GetExistingSystem<PheromoneDropSystem>() as PheromoneDropSystem;
+        
+        var jobHandle = Job.WithCode(() =>
         {
-            grid[i] *= trailDecay;
-        }
+            for (int i = 0; i < mapSize * mapSize; ++i)
+            {
+                grid[i] *= trailDecay;
+            }
+        })
+        .WithName("PheromoneDecay")
+        .Schedule(prevSystem.LastJob);
 
-        return inputDeps;
+        return jobHandle;
     }
 
     protected override void OnCreate()

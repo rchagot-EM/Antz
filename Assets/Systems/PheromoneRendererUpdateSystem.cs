@@ -3,7 +3,7 @@ using Unity.Jobs;
 using Unity.Rendering;
 using UnityEngine;
 
-[UpdateAfter(typeof(PheromoneDecaySystem))]
+[UpdateInGroup(typeof(PresentationSystemGroup))]
 public class PheromoneRendererUpdateSystem : JobComponentSystem
 {
     protected override JobHandle OnUpdate(JobHandle inputDeps)

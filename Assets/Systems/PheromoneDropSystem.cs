@@ -12,6 +12,8 @@ public class PheromoneDropSystem : JobComponentSystem
     private EntityQuery m_FoodHolderQuery;
     private EntityQuery m_FoodSeekerQuery;
 
+    public JobHandle LastJob; // HACK
+
     [BurstCompile]
     [RequireComponentTag(typeof(TagAnt))]
     struct PheromoneDropJob : IJobForEach<Position, Speed>
@@ -108,6 +110,7 @@ public class PheromoneDropSystem : JobComponentSystem
         var h2 = jobDropHigh.Schedule(m_FoodHolderQuery, h1);
         var h3 = jobGather.Schedule(h2);
 
+        LastJob = h3;
         return h3;
     }
 
