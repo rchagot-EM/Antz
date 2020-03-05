@@ -2,23 +2,27 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
+using Unity.Mathematics;
 
 public class AntSteeringSystem : JobComponentSystem
 {
+    Random RandomGen;
+
     [BurstCompile]
     struct RandomSteeringJob : IJobForEach_C<RandomSteering>
     {
         public float RandomSteeringRange;
+        public Random random;
 
         public void Execute(ref RandomSteering randomSteering)
         {
-            randomSteering.Value = Random.Range(-RandomSteeringRange, RandomSteeringRange);
+            randomSteering.Value = random.NextFloat(-RandomSteeringRange, RandomSteeringRange);
         }
     }
 
     protected override void OnCreate()
     {
+        RandomGen = new Random(123456);
         base.OnCreate();
         RequireSingletonForUpdate<AntManagerSettings>();
     }
@@ -30,6 +34,7 @@ public class AntSteeringSystem : JobComponentSystem
 
         var job = new RandomSteeringJob
         {
+            random = RandomGen,
             RandomSteeringRange = settings.RandomSteering
         };
 
