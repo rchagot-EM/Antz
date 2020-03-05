@@ -7,6 +7,7 @@ using Unity.Mathematics;
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class AntSpawnSystem : JobComponentSystem
 {
+    public int TotalAnts;
     EntityQuery m_AntQuery;
     protected override void OnCreate()
     {
@@ -28,6 +29,7 @@ public class AntSpawnSystem : JobComponentSystem
         {
             using (var ants = EntityManager.Instantiate(spawner.AntPrefab, spawner.AntCount, Allocator.Temp))
             {
+                TotalAnts = spawner.AntCount;
                 for (int i = 0; i < ants.Length; ++i)
                 {
                     EntityManager.SetComponentData(ants[i], new Position
