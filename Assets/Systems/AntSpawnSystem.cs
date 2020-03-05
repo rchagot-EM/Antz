@@ -7,16 +7,18 @@ using Unity.Mathematics;
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class AntSpawnSystem : JobComponentSystem
 {
-
+    EntityQuery m_AntQuery;
     protected override void OnCreate()
     {
         base.OnCreate();
-
+        m_AntQuery = GetEntityQuery(ComponentType.ReadOnly<TagAnt>());
         RequireSingletonForUpdate<AntManagerSettings>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        if (!m_AntQuery.IsEmptyIgnoreFilter)
+            return inputDeps;
         var random = new Random(0x1a2b3c4d);
 
         var settings = GetSingleton<AntManagerSettings>();
@@ -49,7 +51,6 @@ public class AntSpawnSystem : JobComponentSystem
                 }
             }
         }).Run();
-        Enabled = false;
         return inputDeps;
     }
 }

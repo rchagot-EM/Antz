@@ -596,7 +596,7 @@ MonoBehaviour:
   mapSize: 128
   bucketResolution: 64
   antSpeed: 0.2
-  antAccel: 0.07
+  antAccel: 0.2
   trailAddSpeed: 0.3
   trailDecay: 0.9985
   randomSteering: 0.14

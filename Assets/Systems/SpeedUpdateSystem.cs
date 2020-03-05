@@ -3,20 +3,20 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
-using Unity.Transforms;
-using static Unity.Mathematics.math;
 
 public class SpeedUpdateSystem : JobComponentSystem
 {
     [BurstCompile]
-    struct SpeedUpdateSystemJob : IJobForEach<Speed>
+    struct SpeedUpdateSystemJob : IJobForEach_CCC<Speed, PheromoneSteering, ObstacleSteering>
     {
         public float AntSpeed;
-        
-        //@TODO: take PheroSteering and ObstacleSteering into account
-        public void Execute(ref Speed speed)
+        public float AntAccel;
+       
+        public void Execute(ref Speed speed, [ReadOnly] ref PheromoneSteering pheromone, [ReadOnly] ref ObstacleSteering obstacle)
         {
-            speed.Value = AntSpeed;
+            float targetSpeed = AntSpeed;
+            targetSpeed *= 1f - (math.abs(pheromone.Value) + math.abs(obstacle.Value)) / 3f;
+            speed.Value += (targetSpeed - speed.Value) * AntAccel;
         }
     }
 
@@ -33,7 +33,8 @@ public class SpeedUpdateSystem : JobComponentSystem
 
         var job = new SpeedUpdateSystemJob
         {
-            AntSpeed = settings.AntSpeed
+            AntSpeed = settings.AntSpeed,
+            AntAccel = settings.AntAccel
         };
         return job.Schedule(this, inputDependencies);
     }
