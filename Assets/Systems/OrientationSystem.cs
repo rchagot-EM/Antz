@@ -6,7 +6,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 
-[UpdateAfter(typeof(AntSteeringSystem))]
+[UpdateAfter(typeof(RandomSteeringSystem))]
 public class OrientationSystem : JobComponentSystem
 {
     [BurstCompile]
