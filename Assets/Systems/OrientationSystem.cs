@@ -35,7 +35,7 @@ public class OrientationSystem : JobComponentSystem
     {
         base.OnCreate();
 
-        RequireSingletonForUpdate<AntManagerAuthoring>();
+        RequireSingletonForUpdate<AntManagerSettings>();
     }
 
 
