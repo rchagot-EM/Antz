@@ -2,38 +2,38 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using Unity.Mathematics;
-using Unity.Transforms;
-using static Unity.Mathematics.math;
-
+using UnityEngine;
 
 public class AntSteeringSystem : JobComponentSystem
 {
-    EntityQuery m_AntQuery;
+    [BurstCompile]
+    struct RandomSteeringJob : IJobForEach_C<RandomSteering>
+    {
+        public float RandomSteeringRange;
+
+        public void Execute(ref RandomSteering randomSteering)
+        {
+            randomSteering.Value = Random.Range(-RandomSteeringRange, RandomSteeringRange);
+        }
+    }
 
     protected override void OnCreate()
     {
         base.OnCreate();
-
-        m_AntQuery = GetEntityQuery(ComponentType.ReadOnly<TagAnt>());
-        RequireForUpdate(m_AntQuery);
+        RequireSingletonForUpdate<AntManagerSettings>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
-        int count = m_AntQuery.CalculateEntityCount();
-        var randomSteering   = new NativeArray<float>(count, Allocator.TempJob);
-        var pheroSteering    = new NativeArray<float>(count, Allocator.TempJob);
-        var obstacleSteering = new NativeArray<float>(count, Allocator.TempJob);
-        var goalSteering     = new NativeArray<float>(count, Allocator.TempJob);
 
+        var settings = GetSingleton<AntManagerSettings>();
 
-        var outputDependencies = inputDependencies;
-        randomSteering.Dispose(outputDependencies);
-        pheroSteering.Dispose(outputDependencies);
-        obstacleSteering.Dispose(outputDependencies);
-        goalSteering.Dispose(outputDependencies);
+        var job = new RandomSteeringJob
+        {
+            RandomSteeringRange = settings.RandomSteering
+        };
 
-        return outputDependencies;
+        return job.Schedule(this, inputDependencies);
+
     }
 }
