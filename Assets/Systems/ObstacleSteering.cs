@@ -21,7 +21,7 @@ public class ObstacleSteeringSystem : JobComponentSystem
         var bucketResolution = settings.BucketResolution;
         var ObstacleBucket = GetSingleton<ObstacleBuckets>();
 
-        return Entities.WithoutBurst().WithAll<TagAnt>().ForEach((ref FacingAngle facingAngle, ref Position position, ref ObstacleSteering steering) =>
+        return Entities.WithAll<TagAnt>().ForEach((ref FacingAngle facingAngle, ref Position position, ref ObstacleSteering steering) =>
         {
             steering.Value = 0;
             for (int i = -1; i <= 1; i += 2)
