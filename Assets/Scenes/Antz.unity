@@ -592,7 +592,7 @@ MonoBehaviour:
     type: 3}
   pheromoneRendererPrefab: {fileID: 7695722730819358069, guid: 52ee2e989c1984724832918fd1417bda,
     type: 3}
-  antCount: 1000
+  antCount: 5000
   mapSize: 128
   bucketResolution: 64
   antSpeed: 0.2
