@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 using Unity.Jobs;
+using Unity.Rendering;
 using UnityEngine;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -9,17 +10,13 @@ public class PheromoneRendererSpawnSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        var settings = GetSingleton<AntManagerSettings>();
+        int mapSize = settings.MapSize;
+
         bool hasNoPheromoneRenderer = m_PheromoneRendererQuery.IsEmptyIgnoreFilter;
         if (hasNoPheromoneRenderer)
         {
-            Entities.WithStructuralChanges().ForEach((ref AntManagerSettings settings) =>
-            {
-                int mapSize = settings.MapSize;
-                Vector2 rendererPosition = Vector2.one * mapSize * .5f;
-
-                EntityManager.Instantiate(settings.PheromoneRendererPrefab);
-            })
-            .Run();
+            Entity e = EntityManager.Instantiate(settings.PheromoneRendererPrefab);
         }
 
         return inputDeps;
@@ -31,5 +28,7 @@ public class PheromoneRendererSpawnSystem : JobComponentSystem
         {
             All = new[] { ComponentType.ReadOnly<TagPheromoneRenderer>() }
         });
+
+        RequireSingletonForUpdate<AntManagerSettings>();
     }
 }
