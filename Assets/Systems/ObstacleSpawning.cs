@@ -29,12 +29,8 @@ public class ObstacleSpawning : JobComponentSystem
 
         Entities.WithStructuralChanges().ForEach((ref ObstacleSpawner spawner) =>
         {
-            //TODO clean up
-            //float rRadius = (spawner.ObstacleRingCount / (spawner.ObstacleRingCount + 1f)) * (mapSize * .5f);
-            //float cir = rRadius * 2f * Mathf.PI;
-            //int ultraMaxCount = Mathf.CeilToInt(cir / (2f * spawner.ObstacleRadius) * 2f) * spawner.ObstacleRingCount; 
-            NativeList<Matrix4x4> obstaclesToSpawn = new NativeList<Matrix4x4>();// ultraMaxCount);
-
+            var scale = new Vector3(spawner.ObstacleRadius * 2f, spawner.ObstacleRadius * 2f, 1f) / mapSize;
+            float obstaclesPerRing = spawner.ObstaclesPerRing;
             for (int ring = 1; ring <= spawner.ObstacleRingCount; ring++)
             {
                 float ringRadius = (ring / (spawner.ObstacleRingCount + 1f)) * (mapSize * .5f);
@@ -42,34 +38,37 @@ public class ObstacleSpawning : JobComponentSystem
                 int maxCount = Mathf.CeilToInt(circumference / (2f * spawner.ObstacleRadius) * 2f);
                 int offset = UnityEngine.Random.Range(0, maxCount);
                 int holeCount = UnityEngine.Random.Range(1, 3);
+                NativeList<Vector2> obstaclesToSpawn = new NativeList<Vector2>(maxCount, Allocator.TempJob);
 
                 for (int j = 0; j < maxCount; j++)
                 {
                     float t = (float)j / maxCount;
-                    if ((t * holeCount) % 1f < spawner.ObstaclesPerRing)
+                    if ((t * holeCount) % 1f < obstaclesPerRing)
                     {
                         float angle = (j + offset) / (float)maxCount * (2f * Mathf.PI);
                         Vector2 pos = new Vector2(mapSize * .5f + Mathf.Cos(angle) * ringRadius, mapSize * .5f + Mathf.Sin(angle) * ringRadius);
-                        obstaclesToSpawn.Add(Matrix4x4.TRS(pos / mapSize, Quaternion.identity, new Vector3(spawner.ObstacleRadius * 2f, spawner.ObstacleRadius * 2f, 1f) / mapSize));
+                        obstaclesToSpawn.Add(pos);
 
                     }
                 }
-            }
-            using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, obstaclesToSpawn.Length, Allocator.Temp))
-            {
-                for (int j = 0; j < obstacles.Length; j++)
+                using (var obstacles = EntityManager.Instantiate(spawner.ObstaclePrefab, obstaclesToSpawn.Length, Allocator.TempJob))
                 {
-                    float2 pos = new float2(obstaclesToSpawn[j].m00, obstaclesToSpawn[j].m01);
-                    EntityManager.SetComponentData(obstacles[j], new Position()
+                    for (int j = 0; j < obstacles.Length; j++)
                     {
-                        Value = pos
-                    });
+                        Vector2 pos = obstaclesToSpawn[j];
+                        EntityManager.SetComponentData(obstacles[j], new Position()
+                        {
+                            Value = pos
+                        });
 
-                    EntityManager.SetComponentData(obstacles[j], new LocalToWorld()
-                    {
-                        Value = obstaclesToSpawn[j]
-                    });
+                        EntityManager.SetComponentData(obstacles[j], new LocalToWorld()
+                        {
+                            Value = Matrix4x4.TRS(pos / mapSize, Quaternion.identity, scale)
+                        });
+                    }
+                    obstacles.Dispose();
                 }
+                obstaclesToSpawn.Dispose();
             }
 
         }).Run();
