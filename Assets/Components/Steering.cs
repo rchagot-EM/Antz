@@ -13,7 +13,7 @@ public struct GoalSteering : IComponentData
 
 public struct ObstacleSteering : IComponentData
 {
-    public float Value;
+    public int Value;
 }
 
 public struct RandomSteering : IComponentData

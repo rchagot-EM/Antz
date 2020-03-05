@@ -11,9 +11,23 @@ using UnityEngine;
 struct ObstacleBuckets : IComponentData
 {
     public UnsafeMultiHashMap<int, Position> Values;
-    public static int Hash(int x, int y)
+
+    public int GetObstacleBucketCount(float posX, float posY, int mapSize, int bucketResolution)
     {
-        return x + y;
+        int x = (int)(posX / mapSize * bucketResolution);
+        int y = (int)(posY / mapSize * bucketResolution);
+        return Values.CountValuesForKey(Hash(mapSize, x, y));
+    }
+
+    public IEnumerator<Position> GetObstacleBucket(float posX, float posY, int mapSize, int bucketResolution)
+    {
+        int x = (int)(posX / mapSize * bucketResolution);
+        int y = (int)(posY / mapSize * bucketResolution);
+        return Values.GetValuesForKey(Hash(mapSize, x, y));
+    }
+    public static int Hash(int mapSize, int x, int y)
+    {
+        return (x * mapSize) + y;
     }
 }
 
@@ -105,12 +119,12 @@ public class ObstacleSpawning : JobComponentSystem
                     {
                         continue;
                     }
-                    buckets.Values.Add(ObstacleBuckets.Hash(x,y), pos);
+                    buckets.Values.Add(ObstacleBuckets.Hash(mapSize, x, y), pos);
                 }
             }
         }).Run();
 
         return inputDeps;
-       
+
     }
 }
