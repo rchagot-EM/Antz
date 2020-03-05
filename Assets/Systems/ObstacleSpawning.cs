@@ -19,7 +19,7 @@ struct ObstacleBuckets : IComponentData
         return Values.CountValuesForKey(Hash(mapSize, x, y));
     }
 
-    public IEnumerator<Position> GetObstacleBucket(float posX, float posY, int mapSize, int bucketResolution)
+    public UnsafeMultiHashMap<int, Position>.Enumerator GetObstacleBucket(float posX, float posY, int mapSize, int bucketResolution)
     {
         int x = (int)(posX / mapSize * bucketResolution);
         int y = (int)(posY / mapSize * bucketResolution);

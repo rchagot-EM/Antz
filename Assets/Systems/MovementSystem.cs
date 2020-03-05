@@ -16,6 +16,9 @@ public class MovementSystem : JobComponentSystem
     {
         public int MapSize;
         public float OutwardStrength;
+        public float ObstacleRadius;
+        public int BucketResolution;
+        public ObstacleBuckets OstacleBuckets; // copy :/
     
         public void Execute(ref Position position, /*[ReadOnly] */ref FacingAngle facingAngle, [ReadOnly] ref Speed speed)
         {
@@ -40,6 +43,26 @@ public class MovementSystem : JobComponentSystem
 
 
             //@TODO: Obstacles
+            var nearbyObstacles = OstacleBuckets.GetObstacleBucket(position.Value.x, position.Value.y, MapSize, BucketResolution);
+            //for (int j = 0; j < nearbyObstacles.Length; j++)
+            while (nearbyObstacles.MoveNext())
+            {
+                Position obstaclePosition = nearbyObstacles.Current;
+                float dx = position.Value.x - obstaclePosition.Value.x;
+                float dy = position.Value.y - obstaclePosition.Value.y;
+                float sqrDist = dx * dx + dy * dy;
+                if (sqrDist < ObstacleRadius * ObstacleRadius)
+                {
+                    float dist = math.sqrt(sqrDist);
+                    dx /= dist;
+                    dy /= dist;
+                    position.Value.x = obstaclePosition.Value.x + dx * ObstacleRadius;
+                    position.Value.y = obstaclePosition.Value.y + dy * ObstacleRadius;
+
+                    vx -= dx * (dx * vx + dy * vy) * 1.5f;
+                    vy -= dy * (dx * vx + dy * vy) * 1.5f;
+                }
+            }
 
 
             //@TODO: inward/outward direction
@@ -59,17 +82,24 @@ public class MovementSystem : JobComponentSystem
         base.OnCreate();
 
         RequireSingletonForUpdate<AntManagerSettings>();
+        RequireSingletonForUpdate<ObstacleSpawner>();
+        RequireSingletonForUpdate<ObstacleBuckets>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
         var settings = GetSingleton<AntManagerSettings>();
+        var obstacleSpawner = GetSingleton<ObstacleSpawner>();
+        var obstacleBuckets = GetSingleton<ObstacleBuckets>();
 
         //@TODO: split?
         var job = new MovementSystemJob
         {
             MapSize = settings.MapSize,
-            OutwardStrength = settings.OutwardStrength
+            OutwardStrength = settings.OutwardStrength,
+            ObstacleRadius = obstacleSpawner.ObstacleRadius,
+            BucketResolution = settings.BucketResolution,
+            OstacleBuckets = obstacleBuckets
         };
         
         return job.Schedule(this, inputDependencies);
