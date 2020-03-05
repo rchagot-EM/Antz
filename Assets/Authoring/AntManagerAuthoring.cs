@@ -21,6 +21,7 @@ public struct AntManagerSettings : IComponentData
 	public float OutwardStrength;
 	public float InwardStrength;
 	public int RotationResolution;
+	public int BucketResolution;
 
 	public Entity ColonyPrefab;
 	public Entity FoodSourcePrefab;
@@ -91,6 +92,7 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 			OutwardStrength = outwardStrength,
 			InwardStrength = inwardStrength,
 			RotationResolution = rotationResolution,
+            BucketResolution = bucketResolution,
 
 			ColonyPrefab = conversionSystem.GetPrimaryEntity(colonyPrefab),
 			FoodSourcePrefab = conversionSystem.GetPrimaryEntity(foodSourcePrefab),

@@ -1,11 +1,21 @@
 ﻿using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+
+struct ObstacleBuckets : IComponentData
+{
+    public UnsafeMultiHashMap<int, Position> Values;
+    public static int Hash(int x, int y)
+    {
+        return x + y;
+    }
+}
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class ObstacleSpawning : JobComponentSystem
@@ -25,7 +35,15 @@ public class ObstacleSpawning : JobComponentSystem
         }
 
         var settings = GetSingleton<AntManagerSettings>();
+        var obstacleSpawner = GetSingleton<ObstacleSpawner>();
+        float radius = obstacleSpawner.ObstacleRadius;
         var mapSize = settings.MapSize;
+        var bucketResolution = settings.BucketResolution;
+        World.EntityManager.CreateEntity(typeof(ObstacleBuckets));
+        var values = new UnsafeMultiHashMap<int, Position>(bucketResolution * bucketResolution, Allocator.Persistent);
+        var buckets = new ObstacleBuckets { Values = values };
+        SetSingleton(buckets);
+
 
         Entities.WithStructuralChanges().ForEach((ref ObstacleSpawner spawner) =>
         {
@@ -73,60 +91,26 @@ public class ObstacleSpawning : JobComponentSystem
 
         }).Run();
 
+        Entities.WithStructuralChanges().WithAll<TagObstacle>().ForEach((Position pos) =>
+        {
+            for (int x = Mathf.FloorToInt((pos.Value.x - radius) / mapSize * bucketResolution); x <= Mathf.FloorToInt((pos.Value.x + radius) / mapSize * bucketResolution); x++)
+            {
+                if (x < 0 || x >= bucketResolution)
+                {
+                    continue;
+                }
+                for (int y = Mathf.FloorToInt((pos.Value.y - radius) / mapSize * bucketResolution); y <= Mathf.FloorToInt((pos.Value.y + radius) / mapSize * bucketResolution); y++)
+                {
+                    if (y < 0 || y >= bucketResolution)
+                    {
+                        continue;
+                    }
+                    buckets.Values.Add(ObstacleBuckets.Hash(x,y), pos);
+                }
+            }
+        }).Run();
+
         return inputDeps;
-        /*
-
-		obstacleMatrices = new Matrix4x4[Mathf.CeilToInt((float)output.Count / instancesPerBatch)][];
-		for (int i = 0; i < obstacleMatrices.Length; i++)
-		{
-			obstacleMatrices[i] = new Matrix4x4[Mathf.Min(instancesPerBatch, output.Count - i * instancesPerBatch)];
-			for (int j = 0; j < obstacleMatrices[i].Length; j++)
-			{
-				obstacleMatrices[i][j] = Matrix4x4.TRS(output[i * instancesPerBatch + j].position / mapSize, Quaternion.identity, new Vector3(obstacleRadius * 2f, obstacleRadius * 2f, 1f) / mapSize);
-			}
-		}
-
-		obstacles = output.ToArray();
-
-		List<Obstacle>[,] tempObstacleBuckets = new List<Obstacle>[bucketResolution, bucketResolution];
-
-		for (int x = 0; x < bucketResolution; x++)
-		{
-			for (int y = 0; y < bucketResolution; y++)
-			{
-				tempObstacleBuckets[x, y] = new List<Obstacle>();
-			}
-		}
-
-		for (int i = 0; i < obstacles.Length; i++)
-		{
-			Vector2 pos = obstacles[i].position;
-			float radius = obstacles[i].radius;
-			for (int x = Mathf.FloorToInt((pos.x - radius) / mapSize * bucketResolution); x <= Mathf.FloorToInt((pos.x + radius) / mapSize * bucketResolution); x++)
-			{
-				if (x < 0 || x >= bucketResolution)
-				{
-					continue;
-				}
-				for (int y = Mathf.FloorToInt((pos.y - radius) / mapSize * bucketResolution); y <= Mathf.FloorToInt((pos.y + radius) / mapSize * bucketResolution); y++)
-				{
-					if (y < 0 || y >= bucketResolution)
-					{
-						continue;
-					}
-					tempObstacleBuckets[x, y].Add(obstacles[i]);
-				}
-			}
-		}
-
-		obstacleBuckets = new Obstacle[bucketResolution, bucketResolution][];
-		for (int x = 0; x < bucketResolution; x++)
-		{
-			for (int y = 0; y < bucketResolution; y++)
-			{
-				obstacleBuckets[x, y] = tempObstacleBuckets[x, y].ToArray();
-			}
-		}
-	}*/
+       
     }
 }
