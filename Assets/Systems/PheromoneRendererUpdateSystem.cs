@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
@@ -8,10 +9,11 @@ using UnityEngine;
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 public class PheromoneRendererUpdateSystem : JobComponentSystem
 {
+    [BurstCompile]
     struct FillJob : IJobParallelFor
     {
         public NativeArray<uint> Colors;
-        public UnsafeHashMap<int, float> Grid;
+        [ReadOnly] public UnsafeHashMap<int, float> Grid;
 
         public void Execute(int i)
         {
