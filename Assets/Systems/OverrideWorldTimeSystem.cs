@@ -9,7 +9,17 @@ public class OverrideWorldTimeSystem : JobComponentSystem
 {
     public TimeData time;
     public int timeScale = 1;
-    int multiplier = 2;
+    int multiplier = 1;
+    ComponentSystemGroup simGroup;
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+
+        simGroup = World.GetOrCreateSystem<SimulationSystemGroup>();
+        //FixedRateUtils.EnableFixedRateWithCatchUp(simGroup, UnityEngine.Time.fixedDeltaTime);
+        FixedRateUtils.EnableFixedRateSimple(simGroup, UnityEngine.Time.fixedDeltaTime);
+    }
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
@@ -22,8 +32,13 @@ public class OverrideWorldTimeSystem : JobComponentSystem
         else if (Input.inputString != "" && int.TryParse(Input.inputString, out int tempTimeScale) && tempTimeScale != 0)
         { timeScale = tempTimeScale * multiplier; };
 
-        time = new TimeData(World.Time.ElapsedTime, World.Time.DeltaTime * timeScale);
-        World.SetTime(time);
+        //time = new TimeData(World.Time.ElapsedTime, World.Time.DeltaTime * timeScale);
+        //World.SetTime(time);
+        if (UnityEngine.Time.timeScale != timeScale)
+        {
+            UnityEngine.Time.timeScale = timeScale;
+            FixedRateUtils.EnableFixedRateWithCatchUp(simGroup, UnityEngine.Time.fixedDeltaTime);
+        }
 
         return inputDependencies;
     }

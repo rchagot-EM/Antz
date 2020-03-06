@@ -35,7 +35,8 @@ public class GoalSteeringSystem : JobComponentSystem
         public int mapSize;
         public int bucketResolution;
         [ReadOnly] public ObstacleBuckets obstacleBuckets;
-        public Position targetPos;
+        [DeallocateOnJobCompletion]
+        [ReadOnly] public NativeArray<Position> targetPos;
 
         [BurstDiscard]
         public void Draw(Position antPos, Position targetPos, int mapSize, Color color)
@@ -46,10 +47,10 @@ public class GoalSteeringSystem : JobComponentSystem
         public void Execute(ref GoalSteering steering, [ReadOnly] ref Position antPos, [ReadOnly] ref FacingAngle facingAngle)
         {
             float antAngle = facingAngle.Value;
-            if (Linecast(antPos.Value, targetPos.Value, obstacleBuckets, mapSize, bucketResolution) == false)
+            if (Linecast(antPos.Value, targetPos[0].Value, obstacleBuckets, mapSize, bucketResolution) == false)
             {
                 //Color color = Color.green;
-                float targetAngle = Mathf.Atan2(targetPos.Value.y - antPos.Value.y, targetPos.Value.x - antPos.Value.x);
+                float targetAngle = Mathf.Atan2(targetPos[0].Value.y - antPos.Value.y, targetPos[0].Value.x - antPos.Value.x);
                 if (targetAngle - antAngle > Mathf.PI)
                 {
                     antAngle += Mathf.PI * 2f;
@@ -111,26 +112,27 @@ public class GoalSteeringSystem : JobComponentSystem
         var settings = GetSingleton<AntManagerSettings>();
         var obstacleBucket = GetSingleton<ObstacleBuckets>();
 
-        var getPosFromEntity = GetComponentDataFromEntity<Position>();
-        var colonyPos = getPosFromEntity[m_ColonyQuery.GetSingletonEntity()];
-        var foodSourcePos = getPosFromEntity[m_FoodSourceQuery.GetSingletonEntity()];
-
+        var colonyPositions = m_ColonyQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle colonyHandle);
+        var foodPositions = m_FoodSourceQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle foodHandle);
+        inputDependencies = JobHandle.CombineDependencies(inputDependencies, colonyHandle);
+        
         var jobHasFood = new GoalSteeringJob
         {
             mapSize = settings.MapSize,
             bucketResolution = settings.BucketResolution,
             obstacleBuckets = obstacleBucket,
-            targetPos = colonyPos
+            targetPos = colonyPositions
         };
 
         var job = jobHasFood.Schedule(m_HoldingFoodQuery, inputDependencies);
+        job = JobHandle.CombineDependencies(job, foodHandle);
 
         var jobHasNoFood = new GoalSteeringJob
         {
             mapSize = settings.MapSize,
             bucketResolution = settings.BucketResolution,
             obstacleBuckets = obstacleBucket,
-            targetPos = foodSourcePos
+            targetPos = foodPositions
         };
         return jobHasNoFood.Schedule(m_NotHoldingFoodQuery, job);
     }

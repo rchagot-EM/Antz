@@ -16,10 +16,12 @@ public class FoodGatheringSystem : JobComponentSystem
     struct AddFoodJob : IJobForEachWithEntity<Position, FacingAngle>
     {
         public EntityCommandBuffer.Concurrent ecb;
-        public Position FoodSourcePos;
+        [DeallocateOnJobCompletion]
+        [ReadOnly] public NativeArray<Position> FoodSourcePos;
+
         public void Execute(Entity e, int index, [ReadOnly] ref Position antPos, ref FacingAngle facingAngle)
         {
-            Vector2 distance = antPos.Value - FoodSourcePos.Value;
+            Vector2 distance = antPos.Value - FoodSourcePos[0].Value;
             if (distance.sqrMagnitude < 4f * 4f)
             {
                 //ant.holdingResource = !ant.holdingResource;
@@ -34,10 +36,12 @@ public class FoodGatheringSystem : JobComponentSystem
     struct RemoveFoodJob : IJobForEachWithEntity<Position, FacingAngle>
     {
         public EntityCommandBuffer.Concurrent ecb;
-        public Position ColonyPos;
+        [DeallocateOnJobCompletion]
+        [ReadOnly] public NativeArray<Position> ColonyPos;
+
         public void Execute(Entity e, int index, [ReadOnly] ref Position antPos, ref FacingAngle facingAngle)
         {
-            Vector2 distance = antPos.Value - ColonyPos.Value;
+            Vector2 distance = antPos.Value - ColonyPos[0].Value;
             if (distance.sqrMagnitude < 4f * 4f)
             {
                 //ant.holdingResource = !ant.holdingResource;
@@ -85,21 +89,23 @@ public class FoodGatheringSystem : JobComponentSystem
     {
         //var settings = GetSingleton<AntManagerSettings>();
 
-        var getPosFromEntity = GetComponentDataFromEntity<Position>();
-        var colonyPos = getPosFromEntity[m_ColonyQuery.GetSingletonEntity()];
-        var foodSourcePos = getPosFromEntity[m_FoodSourceQuery.GetSingletonEntity()];
+        var colonyPositions = m_ColonyQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle colonyHandle);
+        var foodPositions = m_FoodSourceQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle foodHandle);
+        inputDependencies = JobHandle.CombineDependencies(inputDependencies, foodHandle);
 
         var jobHasNoFood = new AddFoodJob
         {
-            FoodSourcePos = foodSourcePos,
+            FoodSourcePos = foodPositions,
             ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent()
         };
 
         var job = jobHasNoFood.Schedule(m_NotHoldingFoodQuery, inputDependencies);
         m_EndSimECBSystem.AddJobHandleForProducer(job);
+
+        job = JobHandle.CombineDependencies(job, colonyHandle);
         var jobHasFood = new RemoveFoodJob
         {
-            ColonyPos = colonyPos,
+            ColonyPos = colonyPositions,
             ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent()
         };
         job = jobHasFood.Schedule(m_HoldingFoodQuery, job);
