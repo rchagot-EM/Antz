@@ -81,7 +81,11 @@ public class AntColorUpdateSystem : JobComponentSystem
 
         Entities.ForEach((Entity e) =>
         {
-            EntityManager.SetSharedComponentData(e, CarryRenderMesh);
+            var mesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
+            if (mesh.material != CarryMaterial)
+            {
+                EntityManager.SetSharedComponentData(e, CarryRenderMesh);
+            }
         })
         .WithAll<TagAnt>()
         .WithAll<TagAntHasFood>()
@@ -90,7 +94,11 @@ public class AntColorUpdateSystem : JobComponentSystem
 
         Entities.ForEach((Entity e) =>
         {
-            EntityManager.SetSharedComponentData(e, SearchRenderMesh);
+            var mesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
+            if (mesh.material != SearchMaterial)
+            {
+                EntityManager.SetSharedComponentData(e, SearchRenderMesh);
+            }
         })
         .WithAll<TagAnt>()
         .WithNone<TagAntHasFood>()
