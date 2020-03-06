@@ -18,7 +18,8 @@ public class MovementSystem : JobComponentSystem
         public int MapSize;
         public float OutwardStrength;
         public float InwardStrength;
-        public float2 ColonyPosition;
+        [DeallocateOnJobCompletion]
+        [ReadOnly] public NativeArray<Position> ColonyPosition;
         public float ObstacleRadius;
         public int BucketResolution;
         public ObstacleBuckets OstacleBuckets; // copy :/
@@ -77,8 +78,8 @@ public class MovementSystem : JobComponentSystem
                 inwardOrOutward = InwardStrength;
                 pushRadius = MapSize;
             }
-            float dx2 = ColonyPosition.x - position.Value.x;
-            float dy2 = ColonyPosition.y - position.Value.y;
+            float dx2 = ColonyPosition[0].Value.x - position.Value.x;
+            float dy2 = ColonyPosition[0].Value.y - position.Value.y;
             float dist2 = math.sqrt(dx2 * dx2 + dy2 * dy2);
             inwardOrOutward *= 1f - math.saturate(dist2 / pushRadius);
             vx += dx2 / dist2 * inwardOrOutward;
@@ -112,7 +113,9 @@ public class MovementSystem : JobComponentSystem
         var colonyQuery = GetEntityQuery(
             ComponentType.ReadOnly<TagColony>(),
             ComponentType.ReadOnly<Position>());
-        var colonyPositions = colonyQuery.ToComponentDataArray<Position>(Allocator.TempJob);
+        var colonyPositions = colonyQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle colonyHandle);
+
+        inputDependencies = JobHandle.CombineDependencies(inputDependencies, colonyHandle);
 
         //@TODO: split?
         var job = new MovementSystemJob
@@ -121,14 +124,12 @@ public class MovementSystem : JobComponentSystem
             MapSize = settings.MapSize,
             OutwardStrength = settings.OutwardStrength,
             InwardStrength = settings.InwardStrength,
-            ColonyPosition = colonyPositions[0].Value,
+            ColonyPosition = colonyPositions,
             ObstacleRadius = obstacleSpawner.ObstacleRadius,
             BucketResolution = settings.BucketResolution,
             OstacleBuckets = obstacleBuckets,
             HasFoodComponent = GetComponentDataFromEntity<TagAntHasFood>(true)
         };
-
-        colonyPositions.Dispose();
 
         return job.Schedule(this, inputDependencies);
     }
