@@ -14,13 +14,13 @@ public class PheromoneRendererUpdateSystem : JobComponentSystem
 
         int mapSize = settings.MapSize;
 
-        var colors = new NativeArray<Color>(mapSize * mapSize * 3, Allocator.TempJob);
+        var colors = new NativeArray<uint>(mapSize * mapSize, Allocator.TempJob);
 
         Job.WithCode(() =>
         {
             for (int i = 0; i < mapSize * mapSize; ++i)
             {
-                colors[i] = new Color { r = grid[i] };
+                colors[i] = (uint)(grid[i] * 255);
             }
         })
         .Run();
@@ -37,7 +37,7 @@ public class PheromoneRendererUpdateSystem : JobComponentSystem
                 mesh.material.mainTexture = pheromoneTexture;
             }
 
-            pheromoneTexture.SetPixels(colors.ToArray());
+            pheromoneTexture.SetPixelData(colors, 0);
             pheromoneTexture.Apply();
         })
         .Run();
