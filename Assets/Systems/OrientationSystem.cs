@@ -7,6 +7,9 @@ using Unity.Transforms;
 
 
 [UpdateAfter(typeof(RandomSteeringSystem))]
+[UpdateAfter(typeof(PheromoneSteeringSystem))]
+[UpdateAfter(typeof(ObstacleSteeringSystem))]
+[UpdateAfter(typeof(GoalSteeringSystem))]
 public class OrientationSystem : JobComponentSystem
 {
     [BurstCompile]

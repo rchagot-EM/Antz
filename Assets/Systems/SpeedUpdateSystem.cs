@@ -4,6 +4,8 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 
+[UpdateAfter(typeof(PheromoneSteeringSystem))]
+[UpdateAfter(typeof(ObstacleSteeringSystem))]
 public class SpeedUpdateSystem : JobComponentSystem
 {
     [BurstCompile]
