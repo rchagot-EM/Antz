@@ -81,7 +81,7 @@ public class FoodGatheringSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
-        var settings = GetSingleton<AntManagerSettings>();
+        //var settings = GetSingleton<AntManagerSettings>();
 
         var getPosFromEntity = GetComponentDataFromEntity<Position>();
         var colonyPos = getPosFromEntity[m_ColonyQuery.GetSingletonEntity()];
@@ -93,15 +93,16 @@ public class FoodGatheringSystem : JobComponentSystem
             ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent()
         };
 
-        var job = jobHasNoFood.Schedule(m_HoldingFoodQuery, inputDependencies);
+        var job = jobHasNoFood.Schedule(m_NotHoldingFoodQuery, inputDependencies);
         m_EndSimECBSystem.AddJobHandleForProducer(job);
-        var jobHasNood = new RemoveFoodJob
+        var jobHasFood = new RemoveFoodJob
         {
             ColonyPos = colonyPos,
             ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent()
         };
-        job = jobHasNoFood.Schedule(m_NotHoldingFoodQuery, job);
+        job = jobHasFood.Schedule(m_HoldingFoodQuery, job);
         m_EndSimECBSystem.AddJobHandleForProducer(job);
         return job;
     }
 }
+//create a new command buffer, pass it to job, call complete on job and call playback on command buffer

@@ -34,16 +34,18 @@ struct ObstacleBuckets : IComponentData
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class ObstacleSpawning : JobComponentSystem
 {
+    private EntityQuery m_ObstacleQuery;
     protected override void OnCreate()
     {
         base.OnCreate();
+        m_ObstacleQuery = GetEntityQuery(ComponentType.ReadOnly<TagObstacle>());
         RequireSingletonForUpdate<AntManagerSettings>();
+
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var query = GetEntityQuery(ComponentType.ReadOnly<TagObstacle>());
-        if (!query.IsEmptyIgnoreFilter)
+        if (!m_ObstacleQuery.IsEmptyIgnoreFilter)
         {
             return inputDeps;
         }
