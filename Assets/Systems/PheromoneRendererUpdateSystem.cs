@@ -1,4 +1,5 @@
 ﻿using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Rendering;
@@ -7,6 +8,17 @@ using UnityEngine;
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 public class PheromoneRendererUpdateSystem : JobComponentSystem
 {
+    struct FillJob : IJobParallelFor
+    {
+        public NativeArray<uint> Colors;
+        public UnsafeHashMap<int, float> Grid;
+
+        public void Execute(int i)
+        {
+            Colors[i] = (uint)(Grid[i] * 255);
+        }
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var grid = GetSingleton<PheromoneGrid>().Values;
@@ -16,14 +28,14 @@ public class PheromoneRendererUpdateSystem : JobComponentSystem
 
         var colors = new NativeArray<uint>(mapSize * mapSize, Allocator.TempJob);
 
-        Job.WithCode(() =>
+        var job = new FillJob()
         {
-            for (int i = 0; i < mapSize * mapSize; ++i)
-            {
-                colors[i] = (uint)(grid[i] * 255);
-            }
-        })
-        .Run();
+            Colors = colors,
+            Grid = grid,
+        };
+
+        JobHandle jobHandle = job.Schedule(colors.Length, colors.Length / 8);
+        jobHandle.Complete();
 
         Entities.WithoutBurst().WithAll<TagPheromoneRenderer>().ForEach((RenderMesh mesh) =>
         {
