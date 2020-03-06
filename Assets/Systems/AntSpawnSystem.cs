@@ -50,6 +50,8 @@ public class AntSpawnSystem : JobComponentSystem
                     {
                         Value = random.NextFloat(.75f, 1.25f)
                     });
+
+                    EntityManager.AddComponent<TagAntHasDirtyMesh>(ants[i]);
                 }
             }
         }).Run();
