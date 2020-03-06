@@ -49,6 +49,7 @@ public class GoalSteeringSystem : JobComponentSystem
             float dy = targetPos.Value.y - antPos.Value.y;
             float dist = Mathf.Sqrt(dx * dx + dy * dy);
             int stepCount = Mathf.CeilToInt(dist * .5f);
+            float antAngle = facingAngle.Value;
 
             for (int i = 0; i < stepCount; i++)
             {
@@ -57,20 +58,20 @@ public class GoalSteeringSystem : JobComponentSystem
                 {
                     //Color color = Color.green;
                     float targetAngle = Mathf.Atan2(targetPos.Value.y - antPos.Value.y, targetPos.Value.x - antPos.Value.x);
-                    if (targetAngle - facingAngle.Value > Mathf.PI)
+                    if (targetAngle - antAngle > Mathf.PI)
                     {
-                        facingAngle.Value += Mathf.PI * 2f;
+                        antAngle += Mathf.PI * 2f;
                         //color = Color.red;
                     }
-                    else if (targetAngle - facingAngle.Value < -Mathf.PI)
+                    else if (targetAngle - antAngle < -Mathf.PI)
                     {
-                        facingAngle.Value -= Mathf.PI * 2f;
+                        antAngle -= Mathf.PI * 2f;
                         //color = Color.red;
                     }
                     else
                     {
-                        if (Mathf.Abs(targetAngle - facingAngle.Value) < Mathf.PI * .5f)
-                            steering.Value = targetAngle - facingAngle.Value;
+                        if (Mathf.Abs(targetAngle - antAngle) < Mathf.PI * .5f)
+                            steering.Value = targetAngle - antAngle;
                         else
                             steering.Value = 0f;
                     }
@@ -117,10 +118,7 @@ public class GoalSteeringSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
     {
         var settings = GetSingleton<AntManagerSettings>();
-        var mapSize = settings.MapSize;
-        var bucketResolution = settings.BucketResolution;
         var obstacleBucket = GetSingleton<ObstacleBuckets>();
-        var colony = GetSingleton<TagColony>();
 
         var getPosFromEntity = GetComponentDataFromEntity<Position>();
         var colonyPos = getPosFromEntity[m_ColonyQuery.GetSingletonEntity()];

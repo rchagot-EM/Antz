@@ -94,12 +94,14 @@ public class FoodGatheringSystem : JobComponentSystem
         };
 
         var job = jobHasNoFood.Schedule(m_HoldingFoodQuery, inputDependencies);
-
+        m_EndSimECBSystem.AddJobHandleForProducer(job);
         var jobHasNood = new RemoveFoodJob
         {
             ColonyPos = colonyPos,
             ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent()
         };
-        return jobHasNoFood.Schedule(m_NotHoldingFoodQuery, job);
+        job = jobHasNoFood.Schedule(m_NotHoldingFoodQuery, job);
+        m_EndSimECBSystem.AddJobHandleForProducer(job);
+        return job;
     }
 }
