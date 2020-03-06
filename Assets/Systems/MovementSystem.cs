@@ -11,6 +11,8 @@ using static Unity.Mathematics.math;
 [UpdateAfter(typeof(OrientationSystem))]
 public class MovementSystem : JobComponentSystem
 {
+    EntityQuery colonyQuery;
+
     [BurstCompile]
     struct MovementSystemJob : IJobForEachWithEntity<Position, FacingAngle, Speed>
     {
@@ -102,6 +104,11 @@ public class MovementSystem : JobComponentSystem
         RequireSingletonForUpdate<AntManagerSettings>();
         RequireSingletonForUpdate<ObstacleSpawner>();
         RequireSingletonForUpdate<ObstacleBuckets>();
+
+        colonyQuery = GetEntityQuery(
+            ComponentType.ReadOnly<TagColony>(),
+            ComponentType.ReadOnly<Position>()
+        );
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDependencies)
@@ -110,9 +117,6 @@ public class MovementSystem : JobComponentSystem
         var obstacleSpawner = GetSingleton<ObstacleSpawner>();
         var obstacleBuckets = GetSingleton<ObstacleBuckets>();
 
-        var colonyQuery = GetEntityQuery(
-            ComponentType.ReadOnly<TagColony>(),
-            ComponentType.ReadOnly<Position>());
         var colonyPositions = colonyQuery.ToComponentDataArrayAsync<Position>(Allocator.TempJob, out JobHandle colonyHandle);
 
         inputDependencies = JobHandle.CombineDependencies(inputDependencies, colonyHandle);
