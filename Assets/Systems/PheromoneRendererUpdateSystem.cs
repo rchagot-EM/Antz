@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Rendering;
 using UnityEngine;
@@ -13,6 +14,17 @@ public class PheromoneRendererUpdateSystem : JobComponentSystem
 
         int mapSize = settings.MapSize;
 
+        var colors = new NativeArray<Color>(mapSize * mapSize * 3, Allocator.TempJob);
+
+        Job.WithCode(() =>
+        {
+            for (int i = 0; i < mapSize * mapSize; ++i)
+            {
+                colors[i] = new Color { r = grid[i] };
+            }
+        })
+        .Run();
+
         Entities.WithoutBurst().WithAll<TagPheromoneRenderer>().ForEach((RenderMesh mesh) =>
         {
             var pheromoneTexture = mesh.material.mainTexture as Texture2D;
@@ -25,17 +37,12 @@ public class PheromoneRendererUpdateSystem : JobComponentSystem
                 mesh.material.mainTexture = pheromoneTexture;
             }
 
-            var colors = new Color[mapSize * mapSize];
-
-            for (int i = 0; i < mapSize * mapSize; ++i)
-            {
-                colors[i].r = grid[i];
-            }
-
-            pheromoneTexture.SetPixels(colors);
+            pheromoneTexture.SetPixels(colors.ToArray());
             pheromoneTexture.Apply();
         })
         .Run();
+
+        colors.Dispose();
 
         return inputDeps;
     }
