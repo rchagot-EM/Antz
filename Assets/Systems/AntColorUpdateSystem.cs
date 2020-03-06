@@ -1,6 +1,4 @@
-﻿using Unity.Burst;
-using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Jobs;
 using Unity.Rendering;
 using UnityEngine;
@@ -8,29 +6,10 @@ using UnityEngine;
 [UpdateAfter(typeof(FoodGatheringSystem))]
 public class AntColorUpdateSystem : JobComponentSystem
 {
-    private EntityQuery m_FoodHolderQuery;
-    private EntityQuery m_FoodSeekerQuery;
-
-    private EndSimulationEntityCommandBufferSystem m_EndSimECBSystem;
-
     private RenderMesh SearchRenderMesh;
     private RenderMesh CarryRenderMesh;
     private Material SearchMaterial;
     private Material CarryMaterial;
-
-    /*[BurstCompile]
-    [RequireComponentTag(typeof(TagAnt))]
-    struct AntColorUpdateJob : IJobForEachWithEntity<Brightness>
-    {
-        public EntityCommandBuffer.Concurrent Ecb;
-
-        [ReadOnly] public RenderMesh Mesh;
-
-        public void Execute(Entity e, int index, [ReadOnly] ref Brightness brightness)
-        {
-            Ecb.SetSharedComponent(index, e, Mesh);
-        }
-    }*/
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
@@ -59,48 +38,22 @@ public class AntColorUpdateSystem : JobComponentSystem
             CarryRenderMesh.material = CarryMaterial;
         }
 
-        /*var jobCarrierUpdate = new AntColorUpdateJob
-        {
-            Ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent(),
-            Mesh = CarryRenderMesh
-        };
-
-        var jobSeekerColorUpdate = new AntColorUpdateJob
-        {
-            Ecb = m_EndSimECBSystem.CreateCommandBuffer().ToConcurrent(),
-            Mesh = SearchRenderMesh
-        };
-
-        var h1 = jobCarrierUpdate.Schedule(m_FoodSeekerQuery, inputDeps);
-        var h2 = jobSeekerColorUpdate.Schedule(m_FoodHolderQuery, h1);
-
-        m_EndSimECBSystem.AddJobHandleForProducer(h1);
-        m_EndSimECBSystem.AddJobHandleForProducer(h2);
-
-        return h2;*/
-
         Entities.ForEach((Entity e) =>
         {
-            var mesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
-            if (mesh.material != CarryMaterial)
-            {
-                EntityManager.SetSharedComponentData(e, CarryRenderMesh);
-            }
+            EntityManager.SetSharedComponentData(e, CarryRenderMesh);
+            EntityManager.RemoveComponent<TagAntHasDirtyMesh>(e);
         })
-        .WithAll<TagAnt>()
+        .WithAll<TagAntHasDirtyMesh>()
         .WithAll<TagAntHasFood>()
         .WithStructuralChanges()
         .Run();
 
         Entities.ForEach((Entity e) =>
         {
-            var mesh = EntityManager.GetSharedComponentData<RenderMesh>(e);
-            if (mesh.material != SearchMaterial)
-            {
-                EntityManager.SetSharedComponentData(e, SearchRenderMesh);
-            }
+            EntityManager.SetSharedComponentData(e, SearchRenderMesh);
+            EntityManager.RemoveComponent<TagAntHasDirtyMesh>(e);
         })
-        .WithAll<TagAnt>()
+        .WithAll<TagAntHasDirtyMesh>()
         .WithNone<TagAntHasFood>()
         .WithStructuralChanges()
         .Run();
@@ -110,29 +63,6 @@ public class AntColorUpdateSystem : JobComponentSystem
 
     protected override void OnCreate()
     {
-        m_FoodHolderQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[]
-            {
-                ComponentType.ReadOnly<TagAnt>(),
-                ComponentType.ReadOnly<TagAntHasFood>()
-            }
-        });
-
-        m_FoodSeekerQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            All = new[]
-            {
-                ComponentType.ReadOnly<TagAnt>()
-            },
-            None = new[]
-            {
-                ComponentType.ReadOnly<TagAntHasFood>()
-            }
-        });
-
-        m_EndSimECBSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-
         RequireSingletonForUpdate<AntManagerSettings>();
     }
 }

@@ -24,6 +24,7 @@ public class FoodGatheringSystem : JobComponentSystem
             {
                 //ant.holdingResource = !ant.holdingResource;
                 ecb.AddComponent<TagAntHasFood>(index, e);
+                ecb.AddComponent<TagAntHasDirtyMesh>(index, e);
                 facingAngle.Value += Mathf.PI;
             }
         }
@@ -41,6 +42,7 @@ public class FoodGatheringSystem : JobComponentSystem
             {
                 //ant.holdingResource = !ant.holdingResource;
                 ecb.RemoveComponent<TagAntHasFood>(index, e);
+                ecb.AddComponent<TagAntHasDirtyMesh>(index, e);
                 facingAngle.Value += Mathf.PI;
             }
         }
