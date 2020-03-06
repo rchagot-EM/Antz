@@ -75,7 +75,7 @@ public class PheromoneDropSystem : JobComponentSystem
         int mapSize = settings.MapSize;
         float antSpeed = settings.AntSpeed;
         float trailAddSpeed = settings.TrailAddSpeed;
-        float deltaTime = Time.fixedDeltaTime;
+        float deltaTime = Time.DeltaTime;
 
         var gridUpdates = new UnsafeMultiHashMap<int, float>(mapSize * mapSize, Allocator.Temp);
 
