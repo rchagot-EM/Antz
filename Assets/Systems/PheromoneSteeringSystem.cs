@@ -56,6 +56,6 @@ public class PheromoneSteeringSystem : JobComponentSystem
             Grid = pheromones.Values
         };
 
-        return job.ScheduleSingle(this, inputDependencies);
+        return job.Schedule(this, inputDependencies);
     }
 }

@@ -34,7 +34,7 @@ public class GoalSteeringSystem : JobComponentSystem
     {
         public int mapSize;
         public int bucketResolution;
-        public ObstacleBuckets obstacleBuckets;
+        [ReadOnly] public ObstacleBuckets obstacleBuckets;
         public Position targetPos;
 
         [BurstDiscard]
@@ -45,38 +45,29 @@ public class GoalSteeringSystem : JobComponentSystem
 
         public void Execute(ref GoalSteering steering, [ReadOnly] ref Position antPos, [ReadOnly] ref FacingAngle facingAngle)
         {
-            float dx = targetPos.Value.x - antPos.Value.x;
-            float dy = targetPos.Value.y - antPos.Value.y;
-            float dist = Mathf.Sqrt(dx * dx + dy * dy);
-            int stepCount = Mathf.CeilToInt(dist * .5f);
             float antAngle = facingAngle.Value;
-
-            for (int i = 0; i < stepCount; i++)
+            if (Linecast(antPos.Value, targetPos.Value, obstacleBuckets, mapSize, bucketResolution) == false)
             {
-                float t = (float)i / stepCount;
-                if (Linecast(antPos.Value, targetPos.Value, obstacleBuckets, mapSize, bucketResolution) == false)
+                //Color color = Color.green;
+                float targetAngle = Mathf.Atan2(targetPos.Value.y - antPos.Value.y, targetPos.Value.x - antPos.Value.x);
+                if (targetAngle - antAngle > Mathf.PI)
                 {
-                    //Color color = Color.green;
-                    float targetAngle = Mathf.Atan2(targetPos.Value.y - antPos.Value.y, targetPos.Value.x - antPos.Value.x);
-                    if (targetAngle - antAngle > Mathf.PI)
-                    {
-                        antAngle += Mathf.PI * 2f;
-                        //color = Color.red;
-                    }
-                    else if (targetAngle - antAngle < -Mathf.PI)
-                    {
-                        antAngle -= Mathf.PI * 2f;
-                        //color = Color.red;
-                    }
-                    else
-                    {
-                        if (Mathf.Abs(targetAngle - antAngle) < Mathf.PI * .5f)
-                            steering.Value = targetAngle - antAngle;
-                        else
-                            steering.Value = 0f;
-                    }
-                    //Draw(antPos, targetPos, mapSize, color);
+                    antAngle += Mathf.PI * 2f;
+                    //color = Color.red;
                 }
+                else if (targetAngle - antAngle < -Mathf.PI)
+                {
+                    antAngle -= Mathf.PI * 2f;
+                    //color = Color.red;
+                }
+                else
+                {
+                    if (Mathf.Abs(targetAngle - antAngle) < Mathf.PI * .5f)
+                        steering.Value = targetAngle - antAngle;
+                    else
+                        steering.Value = 0f;
+                }
+                //Draw(antPos, targetPos, mapSize, color);
             }
         }
     }
