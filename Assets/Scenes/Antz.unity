@@ -598,6 +598,8 @@ MonoBehaviour:
   bucketResolution: 64
   antSpeed: 10
   antAccel: 0.07
+  searchColor: {r: 0.1882353, g: 0.21176471, b: 0.3529412, a: 0}
+  carryColor: {r: 0.72156864, g: 0.70980394, b: 0.39607844, a: 0}
   trailAddSpeed: 0.3
   trailDecay: 0.9985
   randomSteering: 0.14

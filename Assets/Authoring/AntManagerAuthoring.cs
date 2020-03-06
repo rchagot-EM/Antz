@@ -11,6 +11,8 @@ public struct AntManagerSettings : IComponentData
 	public int MapSize;
 	public float AntSpeed;
 	public float AntAccel;
+	public Color SearchColor;
+	public Color CarryColor;
 
 	public float TrailAddSpeed;
 	public float TrailDecay;
@@ -60,6 +62,8 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 	public float antSpeed;
 	[Range(0f, 1f)]
 	public float antAccel;
+	public Color searchColor;
+	public Color carryColor;
 	public float trailAddSpeed;
 	[Range(0f, 1f)]
 	public float trailDecay;
@@ -83,7 +87,9 @@ public class AntManagerAuthoring : MonoBehaviour, IConvertGameObjectToEntity, ID
 			MapSize = mapSize,
 			AntSpeed = antSpeed,
 			AntAccel = antAccel,
-			TrailAddSpeed = trailAddSpeed,
+	        SearchColor = searchColor,
+	        CarryColor = carryColor,
+	        TrailAddSpeed = trailAddSpeed,
 			TrailDecay = trailDecay,
 			RandomSteering = randomSteering,
 			PheromoneSteerStrength = pheromoneSteerStrength,
