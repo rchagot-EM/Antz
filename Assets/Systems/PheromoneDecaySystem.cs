@@ -1,28 +1,40 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using Unity.Jobs;
 
 [UpdateAfter(typeof(PheromoneDropSystem))]
 public class PheromoneDecaySystem : JobComponentSystem
 {
+    [BurstCompile]
+    struct PheromoneDecayJob : IJobParallelFor
+    {
+        public UnsafeHashMap<int, float> Grid;
+        [ReadOnly] public float TrailDecay;
+
+        public void Execute(int i)
+        {
+            Grid[i] *= TrailDecay;
+        }
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var grid = GetSingleton<PheromoneGrid>().Values;
+        var pheromones = GetSingleton<PheromoneGrid>();
         var settings = GetSingleton<AntManagerSettings>();
 
         int mapSize = settings.MapSize;
-        float trailDecay = settings.TrailDecay;
         
         var prevSystem = World.GetExistingSystem<PheromoneDropSystem>() as PheromoneDropSystem;
-        
-        var jobHandle = Job.WithCode(() =>
+
+        var jobDecay = new PheromoneDecayJob
         {
-            for (int i = 0; i < mapSize * mapSize; ++i)
-            {
-                grid[i] *= trailDecay;
-            }
-        })
-        .WithName("PheromoneDecay")
-        .Schedule(prevSystem.LastJob);
+            Grid = pheromones.Values,
+            TrailDecay = settings.TrailDecay
+        };
+        
+        var jobHandle = jobDecay.Schedule(mapSize * mapSize, mapSize * mapSize / 8, prevSystem.LastJob);
 
         return jobHandle;
     }

@@ -44,26 +44,21 @@ public class PheromoneDropSystem : JobComponentSystem
     }
 
     [BurstCompile]
-    struct PheromoneGatherUpdatesJob : IJob
+    struct PheromoneGatherUpdatesJob : IJobParallelFor
     {
         public UnsafeHashMap<int, float> Grid;
-
         [ReadOnly] public UnsafeMultiHashMap<int, float> GridUpdates;
-        [ReadOnly] public int MapSize;
 
-        public void Execute()
+        public void Execute(int i)
         {
-            for (int i = 0; i < MapSize * MapSize; ++i)
+            var it = GridUpdates.GetValuesForKey(i);
+
+            while (it.MoveNext())
             {
-                var it = GridUpdates.GetValuesForKey(i);
-
-                while (it.MoveNext())
-                {
-                    Grid[i] += it.Current * (1f - Grid[i]);
-                }
-
-                Grid[i] = Mathf.Min(1f, Grid[i]);
+                Grid[i] += it.Current * (1f - Grid[i]);
             }
+
+            Grid[i] = Mathf.Min(1f, Grid[i]);
         }
     }
 
@@ -103,12 +98,12 @@ public class PheromoneDropSystem : JobComponentSystem
         {
             Grid = pheromones.Values,
             GridUpdates = gridUpdates,
-            MapSize = mapSize,
         };
 
         var h1 = jobDropLow.Schedule(m_FoodSeekerQuery, inputDeps);
         var h2 = jobDropHigh.Schedule(m_FoodHolderQuery, h1);
-        var h3 = jobGather.Schedule(h2);
+
+        var h3 = jobGather.Schedule(mapSize * mapSize, mapSize * mapSize / 8, h2);
 
         LastJob = h3;
         return h3;
