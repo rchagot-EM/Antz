@@ -12,13 +12,13 @@ public class PheromoneDropSystem : JobComponentSystem
     private EntityQuery m_FoodHolderQuery;
     private EntityQuery m_FoodSeekerQuery;
 
-    public JobHandle LastJob; // HACK
+    public JobHandle PheromoneUpdateDep; // HACK
 
     [BurstCompile]
     [RequireComponentTag(typeof(TagAnt))]
     struct PheromoneDropJob : IJobForEach<Position, Speed>
     {
-        public UnsafeMultiHashMap<int, float>.ParallelWriter GridUpdates;
+        public NativeMultiHashMap<int, float>.ParallelWriter GridUpdates;
 
         [ReadOnly] public int MapSize;
         [ReadOnly] public float AntSpeed;
@@ -47,7 +47,7 @@ public class PheromoneDropSystem : JobComponentSystem
     struct PheromoneGatherUpdatesJob : IJobParallelFor
     {
         public UnsafeHashMap<int, float> Grid;
-        [ReadOnly] public UnsafeMultiHashMap<int, float> GridUpdates;
+        [ReadOnly] public NativeMultiHashMap<int, float> GridUpdates;
 
         public void Execute(int i)
         {
@@ -72,7 +72,7 @@ public class PheromoneDropSystem : JobComponentSystem
         float trailAddSpeed = settings.TrailAddSpeed;
         float deltaTime = Time.DeltaTime;
 
-        var gridUpdates = new UnsafeMultiHashMap<int, float>(mapSize * mapSize, Allocator.Temp);
+        var gridUpdates = new NativeMultiHashMap<int, float>(mapSize * mapSize, Allocator.TempJob);
 
         var jobDropLow = new PheromoneDropJob
         {
@@ -105,8 +105,8 @@ public class PheromoneDropSystem : JobComponentSystem
 
         var h3 = jobGather.Schedule(mapSize * mapSize, mapSize * mapSize / 8, h2);
 
-        LastJob = h3;
-        return h3;
+        PheromoneUpdateDep = h3;
+        return gridUpdates.Dispose(h3);
     }
 
     protected override void OnCreate()

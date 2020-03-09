@@ -34,7 +34,7 @@ public class PheromoneDecaySystem : JobComponentSystem
             TrailDecay = settings.TrailDecay
         };
         
-        var jobHandle = jobDecay.Schedule(mapSize * mapSize, mapSize * mapSize / 8, prevSystem.LastJob);
+        var jobHandle = jobDecay.Schedule(mapSize * mapSize, mapSize * mapSize / 8, prevSystem.PheromoneUpdateDep);
 
         return jobHandle;
     }

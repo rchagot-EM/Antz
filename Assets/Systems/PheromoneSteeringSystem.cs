@@ -27,7 +27,7 @@ public class PheromoneSteeringSystem : JobComponentSystem
 
                 if (x < 0 || y < 0 || x >= MapSize || y >= MapSize)
                 {
-                    return;
+                    continue;
                 }
 
                 int index = x + y * MapSize;
